@@ -89,7 +89,7 @@ class Client:
     def _handleNumeric(self, message):
         pass
 
-    def _handleCtcp(nickname, ctcp):
+    def _handleCtcp(self, nickname, ctcp):
         (tag, data) = ctcp
 
         if tag == 'VERSION':
