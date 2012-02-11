@@ -1,5 +1,3 @@
-import re
-
 class Ctcp:
     def __init__(self):
         self.delimiter = '\1'

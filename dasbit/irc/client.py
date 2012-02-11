@@ -4,11 +4,13 @@ from time import time
 import math
 from email.Utils import formatdate
 from dasbit.irc import Factory
+from dasbit.irc import Ctcp
 from dasbit.irc import message as msg
 
 class Client:
     def __init__(self, config):
         self.config = config
+        self.ctcp   = Ctcp()
 
     def join(self, channel, key = None):
         params = [channel]
@@ -53,37 +55,61 @@ class Client:
 
         if isinstance(message, msg.Ping):
             self.send('PONG', message.server, 110, 1)
-        elif isinstance(message, msg.PrivMsg):
-            #self._handlePrivMsg(message)
-            pass
-        elif isinstance(message, msg.Notice):
-            #self._handleNotice(message)
-            pass
+        elif isinstance(message, msg.PrivMsg) or isinstance(message, msg.Notice):
+            parts = self.ctcp.unpackMessage(message.message)
+
+            for part in parts:
+                if isinstance(part, str):
+                    if isinstance(part, msg.PrivMsg):
+                        if len(parts) == 1:
+                            part = message
+                        else:
+                            part = msg.PrivMsg(message.prefix, message.command, part)
+
+                        self._handlePrivMsg(part)
+                    elif isinstance(message, msg.Notice):
+                        if len(parts) == 1:
+                            part = message
+                        else:
+                            part = msg.Notice(message.prefix, message.command, part)
+
+                        self._handleNotice(part)
+                else:
+                    self._handleCtcp(message.nickname, part)
         elif isinstance(message, msg.Numeric):
-            #self._handleNumeric(message)
+            self._handleNumeric(message)
             pass
 
-    def handleCtcpRequest(nick, request):
-        (tag, data) = request
+    def _handlePrivMsg(self, message):
+        pass
+
+    def _handleNotice(self, message):
+        pass
+
+    def _handleNumeric(self, message):
+        pass
+
+    def _handleCtcp(nickname, ctcp):
+        (tag, data) = ctcp
 
         if tag == 'VERSION':
             self.sendNotice(
-                nick,
+                nickname,
                 self.ctcp.packMessage([('VERSION', 'DASBiT 6.0.0')])
             )
         elif tag == 'PING':
             self.sendNotice(
-                nick,
+                nickname,
                 self.ctcp.packMessage([('PING', data)])
             )
         elif tag == 'CLIENTINFO':
             self.sendNotice(
-                nick,
+                nickname,
                 self.ctcp.packMessage([('CLIENTINFO', 'PING VERSION TIME CLIENTINFO')])
             )
         elif tag == 'TIME':
             self.sendNotice(
-                nick,
+                nickname,
                 self.ctcp.packMessage([('TIME', formatdate())])
             )
         elif tag == 'ACTION':
@@ -91,10 +117,9 @@ class Client:
             pass
         else:
             self.sendNotice(
-                nick,
+                nickname,
                 self.ctcp.packMessage([('ERRMSG', 'Unknown request')])
             )
-
 
     def _sendQueued(self, raisePenalty = True):
         if raisePenalty:
