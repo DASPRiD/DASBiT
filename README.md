@@ -14,9 +14,9 @@ Available Plugins
 -----------------
 The following plugins are shipped with DASBiT:
 
-- *users*: user access management
-- *plugins*: plugin management
-- *channels*: joining and parting channels
+- users: user access management
+- plugins: plugin management
+- channels: joining and parting channels
 
 License
 -------
