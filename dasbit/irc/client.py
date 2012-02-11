@@ -12,6 +12,17 @@ class Client:
         self.config = config
         self.ctcp   = Ctcp()
 
+    def reply(self, source, message, mode = 'normal'):
+        if mode == 'normal':
+            if source.target == self.config['nickname']:
+                target = source.prefix['nickname']
+            else:
+                target = source.target
+
+            self.sendPrivMsg(target, message)
+        elif mode == 'notice':
+            self.sendNotice(source.prefix['nickname'], message)
+
     def join(self, channel, key = None):
         params = [channel]
 

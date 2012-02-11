@@ -31,7 +31,7 @@ class Ctcp:
                     tag  = None
                     data = None
                 elif len(part) == 1:
-                    tag  = part[0]
+                    tag  = part[0].upper()
                     data = None
                 else:
                     (tag, data) = part
