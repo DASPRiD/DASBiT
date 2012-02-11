@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+from dasbit.irc import Client
 
 class Frontend:
     def run(self):
@@ -74,16 +75,5 @@ class Frontend:
         return config
 
     def _dispatch(self, config):
-        print config
-
-
-"""
-config = ConfigParser()
-config.read('config.ini')
-
-factory = IrcFactory()
-factory.config = config
-
-reactor.connectTCP(config.get('connection', 'hostname'), config.getint('connection', 'port'), factory)
-reactor.run()
-"""
+        client = Client(config)
+        client.run()

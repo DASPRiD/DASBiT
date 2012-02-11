@@ -14,8 +14,7 @@ class Protocol(BaseProtocol):
         self.client.onProtocolConnectionLost()
 
     def dataReceived(self, data):
-        self.lastTimeReceived  = time()
-        self.buffer           += data
+        self.buffer += data
 
         while '\r\n' in self.buffer:
             pos         = self.buffer.find('\r\n')
@@ -24,6 +23,8 @@ class Protocol(BaseProtocol):
 
             if line == '\r\n':
                 continue
+
+            print '< ' + line.strip()
 
             self.client.handleMessage(self._parseLine(line.strip()))
 
@@ -45,17 +46,19 @@ class Protocol(BaseProtocol):
 
         message += '\r\n'
 
-        self.transport.write(message)
+        print '> ' + message.strip()
+
+        self.transport.write(message.encode('utf-8'))
 
     def _parseLine(self, line):
         # General parsing
         if line.startswith(':'):
-            parts   = re.split('[ ]+', line.strip(), 3)
+            parts   = re.split('[ ]+', line.strip(), 2)
             prefix  = self._parsePrefix(parts[0][1:])
             command = parts[1]
             rawArgs = parts[2]
         else:
-            parts   = re.split('[ ]+', line.strip(), 2)
+            parts   = re.split('[ ]+', line.strip(), 1)
             prefix  = None
             command = parts[0]
             rawArgs = parts[1]

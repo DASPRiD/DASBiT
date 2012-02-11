@@ -1,6 +1,7 @@
 from twisted.internet import reactor
 from Queue import PriorityQueue
 from time import time
+import math
 from email.Utils import formatdate
 from dasbit.irc import Factory
 from dasbit.irc import message as msg
@@ -36,10 +37,10 @@ class Client:
         if self._protocol is None:
             return
 
-        self.sendQueue.put((
+        self._sendQueue.put((
             priority,
             (
-                math.floor((1 + (len(message) + 1) / 100) + penalty),
+                math.floor((1 + (len(command) + len(' '.join(params)) + 1) / 100) + penalty),
                 command,
                 params
             )
@@ -48,14 +49,19 @@ class Client:
         self._sendQueued(False)
 
     def handleMessage(self, message):
+        self._lastTimeReceived = time()
+
         if isinstance(message, msg.Ping):
             self.send('PONG', message.server, 110, 1)
         elif isinstance(message, msg.PrivMsg):
-            self._handlePrivMsg(message)
+            #self._handlePrivMsg(message)
+            pass
         elif isinstance(message, msg.Notice):
-            self._handleNotice(message)
+            #self._handleNotice(message)
+            pass
         elif isinstance(message, msg.Numeric):
-            self._handleNumeric(message)
+            #self._handleNumeric(message)
+            pass
 
     def handleCtcpRequest(nick, request):
         (tag, data) = request
@@ -92,18 +98,18 @@ class Client:
 
     def _sendQueued(self, raisePenalty = True):
         if raisePenalty:
-            self.sendPenalty = min(10, self.sendPenalty + 1)
+            self._sendPenalty = min(10, self._sendPenalty + 1)
 
-        while self.sendPenalty > 0 and not self.sendQueue.empty():
-            (priority, (penalty, command, params)) = self.sendQueue.get()
+        while self._sendPenalty > 0 and not self._sendQueue.empty():
+            (priority, (penalty, command, params)) = self._sendQueue.get()
 
-            self.sendPenalty -= penalty
+            self._sendPenalty -= penalty
             self._protocol.send(command, params)
 
         self._sendDelayedCall = reactor.callLater(1, self._sendQueued)
 
     def _checkForLag(self):
-        if self.lastTimeReceived + 300 <= time():
+        if self._lastTimeReceived + 300 <= time():
             print 'Maximum lag reached, closing connection'
             self.disconnect()
 
@@ -115,8 +121,8 @@ class Client:
         self._sendQueue        = PriorityQueue()
         self._sendPenalty      = 10
 
-        self.send('NICK', self.nickname, 100, 1)
-        self.send('USER', [self.username, '-', '-', 'DASBiT'], 100, 1)
+        self.send('NICK', self.config['nickname'], 100, 1)
+        self.send('USER', [self.config['username'], '-', '-', 'DASBiT'], 100, 1)
 
         self._lagDelayedCall  = reactor.callLater(60, self._checkForLag);
         self._sendDelayedCall = reactor.callLater(1, self._sendQueued)
@@ -141,9 +147,8 @@ class Client:
         print 'Connection failed. Reason: ', reason
 
     def run(self):
-        self.factory        = Factory()
-        self.factory.client = self
+        self.factory = Factory(self)
 
-        reactor.connectTCP(self.config.hostname, self.config.port, self.factory)
+        reactor.connectTCP(self.config['hostname'], self.config['port'], self.factory)
         reactor.run()
 
