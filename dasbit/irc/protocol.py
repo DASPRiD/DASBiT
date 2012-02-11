@@ -68,11 +68,14 @@ class Protocol(BaseProtocol):
 
         if trailingPos > -1:
             trailing = rawArgs[trailingPos + 1:]
-            rawArgs  = rawArgs[0:trailingPos]
+            rawArgs  = rawArgs[0:trailingPos].strip()
         else:
             trailing = None
 
-        args = re.split('[ ]+', rawArgs)
+        if rawArgs:
+            args = re.split('[ ]+', rawArgs)
+        else:
+            args = []
 
         if trailing is not None:
             args.append(trailing)
