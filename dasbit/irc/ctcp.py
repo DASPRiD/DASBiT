@@ -30,7 +30,7 @@ class Ctcp:
                 if len(part) == 0:
                     tag  = None
                     data = None
-                elif len(part == 1):
+                elif len(part) == 1:
                     tag  = part[0]
                     data = None
                 else:

@@ -99,11 +99,23 @@ class Protocol(BaseProtocol):
         try:
             rest, host = prefix.split('@')
         except ValueError:
-            return (prefix, None, None)
+            return {
+                'nickname': prefix,
+                'user':     None,
+                'host':     None
+            }
 
         try:
             nickname, user = rest.split('!')
         except ValueError:
-            return (rest, None, host)
+            return {
+                'nickname': rest,
+                'user':     None,
+                'host':     host
+            }
 
-        return (nickname, user, host)
+        return {
+            'nickname': nickname,
+            'user':     user,
+            'host':     host
+        }

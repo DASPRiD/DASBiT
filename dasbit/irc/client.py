@@ -75,7 +75,7 @@ class Client:
 
                         self._handleNotice(part)
                 else:
-                    self._handleCtcp(message.nickname, part)
+                    self._handleCtcp(message.prefix['nickname'], part)
         elif isinstance(message, msg.Numeric):
             self._handleNumeric(message)
             pass
