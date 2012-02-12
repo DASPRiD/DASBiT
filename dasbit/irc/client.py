@@ -73,7 +73,7 @@ class Client:
 
             for part in parts:
                 if isinstance(part, str):
-                    if isinstance(part, msg.PrivMsg):
+                    if isinstance(message, msg.PrivMsg):
                         if len(parts) == 1:
                             part = message
                         else:
@@ -94,7 +94,7 @@ class Client:
             pass
 
     def _handlePrivMsg(self, message):
-        pass
+        self.pluginManager.testMessage(message)
 
     def _handleNotice(self, message):
         pass

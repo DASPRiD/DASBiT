@@ -70,3 +70,43 @@ class Manager:
             'arguments':  re.compile('^' + arguments + '$'),
             'callback':   callback
         }
+
+    def testMessage(self, message):
+        self._testMessageForCommand(message)
+
+    def _testMessageForCommand(self, message):
+        if self.client.config['commandPrefix']:
+            if message.message.startswith(self.client.config['commandPrefix']):
+                content = message.message[len(self.client.config['commandPrefix']):]
+            else:
+                return
+        else:
+            content = message.message
+
+        data = content.split(' ', 1)
+
+        if len(data) == 1:
+            command   = data[0]
+            arguments = None
+        else:
+            command   = data[0]
+            arguments = data[1]
+
+        if self.commands.has_key(command):
+            command = self.commands[command]
+
+            if not self.plugins[command['plugin']]['enabled']:
+                return
+
+            # Todo: check for permissions
+
+            if command['arguments'] is not None:
+                if arguments is None:
+                    return
+
+                match = command['arguments'].match(arguments)
+
+                if match is None:
+                    return
+
+                command['callback'](message, **match.groupdict())

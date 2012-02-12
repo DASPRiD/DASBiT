@@ -63,7 +63,6 @@ class Ctcp:
         parts           = []
         length          = len(message)
         currentPos      = 0
-        part            = ''
         isExtended      = None
         standardMessage = ''
 
@@ -71,10 +70,10 @@ class Ctcp:
             if isExtended is None:
                 if message[currentPos] == self.delimiter:
                     isExtended = True
+                    part = ''
                 else:
                     isExtended = False
-
-                part = ''
+                    part = message[currentPos]
             else:
                 if message[currentPos] == self.delimiter:
                     if isExtended:
