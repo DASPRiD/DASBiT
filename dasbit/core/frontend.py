@@ -45,7 +45,7 @@ class Frontend:
         if not config['port']:
             config['port'] = 6667
         else:
-            config['port'] = int(port)
+            config['port'] = int(config['port'])
 
         if not config['nickname']:
             config['nickname'] = 'DASBiT'
