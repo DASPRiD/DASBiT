@@ -6,10 +6,11 @@ import dasbit.plugin
 
 class Manager:
     def __init__(self, client, dataPath):
-        self.client   = client
-        self.dataPath = dataPath
-        self.plugins  = {}
-        self.commands = {}
+        self.client        = client
+        self.dataPath      = dataPath
+        self.plugins       = {}
+        self.commands      = {}
+        self.numericEvents = []
 
         packagePath = os.path.dirname(dasbit.plugin.__file__)
 
@@ -34,7 +35,7 @@ class Manager:
             client.config['plugins'] = {}
 
         self.plugins['plugin']['enabled'] = True
-        #self.plugins['user']['enabled'] = True
+        self.plugins['user']['enabled'] = True
 
     def enablePlugin(self, plugin):
         if self.plugins.has_key(plugin):
@@ -67,12 +68,27 @@ class Manager:
         self.commands[command] = {
             'plugin':     plugin,
             'permission': permission,
-            'arguments':  re.compile('^' + arguments + '$'),
+            'arguments':  re.compile('^' + arguments + '$') if arguments is not None else None,
             'callback':   callback
         }
 
+    def registerNumeric(self, plugin, events, callback):
+        self.numericEvents.append({
+            'plugin':   plugin,
+            'events':   events if isinstance(events, list) else [events],
+            'callback': callback
+        })
+
     def testMessage(self, message):
         self._testMessageForCommand(message)
+
+    def testNumericEvent(self, message):
+        for event in self.numericEvents:
+            if not self.plugins[event['plugin']]['enabled']:
+                continue
+
+            if message.command in event['events']:
+                event['callback'](message)
 
     def _testMessageForCommand(self, message):
         if self.client.config['commandPrefix']:
@@ -107,3 +123,5 @@ class Manager:
                     return
 
                 command['callback'](message, **match.groupdict())
+            else:
+                command['callback'](message)

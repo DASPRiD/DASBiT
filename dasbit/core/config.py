@@ -18,7 +18,7 @@ class Config(dict):
 
     def save(self):
         fp = open(self.filename, 'w')
-        json.dump(dict.copy(self), fp)
+        json.dump(dict.copy(self), fp, indent = 4)
         fp.close()
 
     def _decodeList(self, data):

@@ -100,7 +100,7 @@ class Client:
         pass
 
     def _handleNumeric(self, message):
-        pass
+        self.pluginManager.testNumericEvent(message)
 
     def _handleCtcp(self, nickname, ctcp):
         (tag, data) = ctcp
