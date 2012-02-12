@@ -6,7 +6,7 @@ class Manual:
     def __init__(self, manager):
         self.client = manager.client
 
-        manager.registerCommand('manual', 'search', 'manual', '(?P<query>.*?)(?: for (?P<nickname>.+))?', self.search)
+        manager.registerCommand('manual', None, 'manual', '(?P<query>.*?)(?: for (?P<nickname>.+))?', self.search)
 
     def search(self, source, query, nickname = None):
         params = urlencode({
