@@ -4,7 +4,7 @@ class Plugin:
         self.client  = manager.client
 
         manager.registerCommand('plugin', 'enable', 'plugin-enable', '(?P<plugin>[a-z]+)', self.enable)
-        manager.registerCommand('plugin', 'disable', 'plugin-enable', '(?P<plugin>[a-z]+)', self.disable)
+        manager.registerCommand('plugin', 'disable', 'plugin-disable', '(?P<plugin>[a-z]+)', self.disable)
 
     def enable(self, source, plugin):
         success, message = self.manager.enablePlugin(plugin)

@@ -42,8 +42,8 @@ class Manager:
                 return (False, 'Plugin %s is already enabled' % plugin)
             else:
                 self.plugins[plugin]['enabled'] = True
-                self.config['plugins'][plugin]  = True
-                self.config.save()
+                self.client.config['plugins'][plugin]  = True
+                self.client.config.save()
                 return (True, None)
         else:
             return (False, 'Plugin %s does not exist' % plugin)
@@ -57,8 +57,8 @@ class Manager:
                 return (False, 'Plugin %s is already disabled' % plugin)
             else:
                 self.plugins[plugin]['enabled'] = False
-                self.config['plugins'][plugin]  = False
-                self.config.save()
+                self.client.config['plugins'][plugin]  = False
+                self.client.config.save()
                 return (True, None)
         else:
             return (False, 'Plugin %s does not exist' % plugin)
@@ -87,7 +87,7 @@ class Manager:
 
         if len(data) == 1:
             command   = data[0]
-            arguments = None
+            arguments = ''
         else:
             command   = data[0]
             arguments = data[1]
@@ -101,9 +101,6 @@ class Manager:
             # Todo: check for permissions
 
             if command['arguments'] is not None:
-                if arguments is None:
-                    return
-
                 match = command['arguments'].match(arguments)
 
                 if match is None:
