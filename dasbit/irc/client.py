@@ -6,11 +6,13 @@ from email.Utils import formatdate
 from dasbit.irc import Factory
 from dasbit.irc import Ctcp
 from dasbit.irc import message as msg
+from dasbit.plugin import Manager as PluginManager
 
 class Client:
     def __init__(self, config):
-        self.config = config
-        self.ctcp   = Ctcp()
+        self.config        = config
+        self.ctcp          = Ctcp()
+        self.pluginManager = PluginManager(self)
 
     def reply(self, source, message, mode = 'normal'):
         if mode == 'normal':

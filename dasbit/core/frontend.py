@@ -1,6 +1,6 @@
 import sys
 import os
-import json
+from dasbit.core import Config
 from dasbit.irc import Client
 
 class Frontend:
@@ -21,56 +21,42 @@ class Frontend:
             sys.exit(2)
 
         # Check for configuration
-        configPath = os.path.join(self._dataPath, 'config')
+        config = Config(os.path.join(self._dataPath, 'config'))
 
-        if not os.path.exists(configPath):
-            config = self._runConfigPrompt(configPath)
-        else:
-            fp = open(configPath, 'r')
-            config = json.load(fp)
-            fp.close()
+        if not config.has_key('hostname'):
+            config = self._runConfigPrompt(config)
 
         self._dispatch(config)
 
-    def _runConfigPrompt(self, configPath):
+    def _runConfigPrompt(self, config):
         print "Initial setup required."
 
         while True:
-            hostname = raw_input('Hostname: ')
+            config['hostname'] = raw_input('Hostname: ')
 
-            if hostname:
+            if config['hostname']:
                 break
 
-        port          = raw_input('Port [6667]: ')
-        nickname      = raw_input('Nickname [DASBiT]: ')
-        username      = raw_input('Username [dasbit]: ')
-        commandPrefix = raw_input('Command prefix [!]: ')
+        config['port']          = raw_input('Port [6667]: ')
+        config['nickname']      = raw_input('Nickname [DASBiT]: ')
+        config['username']      = raw_input('Username [dasbit]: ')
+        config['commandPrefix'] = raw_input('Command prefix [!]: ')
 
-        if not port:
-            port = 6667
+        if not config['port']:
+            config['port'] = 6667
         else:
-            port = int(port)
+            config['port'] = int(port)
 
-        if not nickname:
-            nickname = 'DASBiT'
+        if not config['nickname']:
+            config['nickname'] = 'DASBiT'
 
-        if not username:
-            username = 'dasbit'
+        if not config['username']:
+            config['username'] = 'dasbit'
 
-        if not commandPrefix:
-            commandPrefix = '!'
+        if not config['commandPrefix']:
+            config['commandPrefix'] = '!'
 
-        config = {
-            'hostname':      hostname,
-            'port':          port,
-            'nickname':      nickname,
-            'username':      username,
-            'commandPrefix': commandPrefix
-        }
-
-        fp = open(configPath, 'w')
-        json.dump(config, fp)
-        fp.close()
+        config.save()
 
         return config
 

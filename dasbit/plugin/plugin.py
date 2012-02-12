@@ -1,14 +1,22 @@
 class Plugin:
-    def __init__(self, client):
+    def __init__(self, manager, client):
         self.client = client
 
-        client.registerCommand('plugin', 'enable', 'plugin-enable', '[a-z]+', self.enable)
-        client.registerCommand('plugin', 'disable', 'plugin-enable', '[a-z]+', self.disable)
+        manager.registerCommand('plugin', 'enable', 'plugin-enable', '(?P<plugin>[a-z]+)', self.enable)
+        manager.registerCommand('plugin', 'disable', 'plugin-enable', '(?P<plugin>[a-z]+)', self.disable)
 
     def enable(self, source, plugin):
-        self.client.enablePlugin(plugin)
-        self.client.reply(source, 'Plugin %s has been enabled' % plugin)
+        success, message = self.client.enablePlugin(plugin)
+
+        if success:
+            self.client.reply(source, 'Plugin %s has been enabled' % plugin, 'notice')
+        else:
+            self.client.reply(source, message, 'notice')
 
     def disable(self, source, plugin):
-        self.client.disablePlugin(plugin)
-        self.client.reply(source, 'Plugin %s has been disabled' % plugin)
+        success, message = self.client.disablePlugin(plugin)
+
+        if success:
+            self.client.reply(source, 'Plugin %s has been disabled' % plugin, 'notice')
+        else:
+            self.client.reply(source, message, 'notice')
