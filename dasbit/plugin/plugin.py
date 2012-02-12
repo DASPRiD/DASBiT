@@ -1,6 +1,6 @@
 class Plugin:
-    def __init__(self, manager, client):
-        self.client = client
+    def __init__(self, manager):
+        self.client = manager.client
 
         manager.registerCommand('plugin', 'enable', 'plugin-enable', '(?P<plugin>[a-z]+)', self.enable)
         manager.registerCommand('plugin', 'disable', 'plugin-enable', '(?P<plugin>[a-z]+)', self.disable)

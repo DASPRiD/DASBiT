@@ -5,7 +5,9 @@ import re
 import dasbit.plugin
 
 class Manager:
-    def __init__(self, client):
+    def __init__(self, client, dataPath):
+        self.client   = client
+        self.dataPath = dataPath
         self.plugins  = {}
         self.commands = {}
 
@@ -20,9 +22,16 @@ class Manager:
             for objectName, object in inspect.getmembers(module):
                 if inspect.isclass(object) and objectName.lower() == name:
                     self.plugins[name] = {
-                        'instance': object(self, client),
+                        'instance': object(self),
                         'enabled':  False
                     }
+
+        if client.config.has_key('plugins'):
+            for plugin, enabled in client.config['plugins'].iteritems():
+                if self.plugins.has_key(plugin):
+                    self.plugins[plugin]['enabled'] = enabled
+        else:
+            client.config['plugins'] = {}
 
         self.plugins['plugin']['enabled'] = True
         #self.plugins['user']['enabled'] = True
@@ -33,6 +42,8 @@ class Manager:
                 return (False, 'Plugin %s is already enabled' % plugin)
             else:
                 self.plugins[plugin]['enabled'] = True
+                self.config['plugins'][plugin]  = True
+                self.config.save()
                 return (True, None)
         else:
             return (False, 'Plugin %s does not exist' % plugin)
@@ -46,6 +57,8 @@ class Manager:
                 return (False, 'Plugin %s is already disabled' % plugin)
             else:
                 self.plugins[plugin]['enabled'] = False
+                self.config['plugins'][plugin]  = False
+                self.config.save()
                 return (True, None)
         else:
             return (False, 'Plugin %s does not exist' % plugin)

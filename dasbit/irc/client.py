@@ -9,10 +9,10 @@ from dasbit.irc import message as msg
 from dasbit.plugin import Manager as PluginManager
 
 class Client:
-    def __init__(self, config):
+    def __init__(self, config, dataPath):
         self.config        = config
         self.ctcp          = Ctcp()
-        self.pluginManager = PluginManager(self)
+        self.pluginManager = PluginManager(self, dataPath)
 
     def reply(self, source, message, mode = 'normal'):
         if mode == 'normal':

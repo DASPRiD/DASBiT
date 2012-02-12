@@ -61,5 +61,5 @@ class Frontend:
         return config
 
     def _dispatch(self, config):
-        client = Client(config)
+        client = Client(config, self._dataPath)
         client.run()
