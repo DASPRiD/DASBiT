@@ -18,7 +18,10 @@ class User:
         self.nicknameDefers  = {}
 
         manager.registerCommand('user', None, 'master', None, self.setMaster)
-        #manager.registerCommand('user', 'acl', 'acl', '(?P<username>[^ ]+) (?P<acl>.+)', self.setAcl)
+        manager.registerCommand('user', 'acl', 'acl-set', '(?P<username>[^ ]+) (?P<aclString>.+)', self.setAcl)
+        manager.registerCommand('user', 'acl', 'acl-add', '(?P<username>[^ ]+) (?P<aclString>.+)', self.addAcl)
+        manager.registerCommand('user', 'acl', 'acl-remove', '(?P<username>[^ ]+) (?P<aclString>.+)', self.removeAcl)
+        manager.registerCommand('user', 'acl', 'acl-show', '(?P<username>[^ ]+)', self.showAcl)
         manager.registerNumeric('user', [318, 330], self.whoisReceived)
 
     def setMaster(self, source):
@@ -35,6 +38,46 @@ class User:
         self.config.save()
 
         self.client.reply(source, 'You are now the master', 'notice')
+
+    def setAcl(self, source, username, aclString):
+        self._storeAcl(source, username, aclString, 'set')
+
+    def addAcl(self, source, username, aclString):
+        self._storeAcl(source, username, aclString, 'add')
+
+    def removeAcl(self, source, username, aclString):
+        self._storeAcl(source, username, aclString, 'remove')
+
+    def _storeAcl(self, source, username, aclString, mode):
+        if self.acl.has_key(username):
+            self.acl[username].modify(aclString, mode)
+        elif mode != 'remove':
+            self.acl[username] = Acl(aclString)
+
+        self.config[username] = repr(self.acl[username])
+        self.config.save()
+
+        self.client.reply(source, 'ACL has been modified', 'notice')
+
+    def showAcl(self, source, username):
+        if self.acl.has_key(username):
+            self.client.reply(source, 'ACL for %s: %s' % (username, repr(self.acl[username])), 'notice')
+        else:
+            self.client.reply(source, 'No ACL for %s found' % username, 'notice')
+
+    def verifyAccess(self, source, permission):
+        rd = defer.Deferred()
+
+        d = defer.maybeDeferred(self._determineUsername, source.prefix)
+        d.addCallback(self._checkAcl, rd, permission)
+
+        return rd
+
+    def _checkAcl(self, username, rd, permission):
+        if not self.acl.has_key(username):
+            rd.callback(False)
+        else:
+            rd.callback(self.acl[username].isAllowed(permission))
 
     def _determineUsername(self, prefix):
         if self.identToUsername.has_key(prefix['ident']):
@@ -71,76 +114,66 @@ class Acl:
         self.resources = {}
 
         if aclString is not None:
-            self.modify(aclString)
+            self.modify(aclString, 'set')
 
-    def modify(self, aclString):
-        mods = re.split('[ ]+', aclString.strip())
+    def modify(self, aclString, mode):
+        if mode == 'set':
+            self.resources = {}
+            mode = 'add'
 
-        for mod in mods:
-            mode = 'allow'
+        if not aclString.strip():
+            return
 
-            if (mod.startswith('-')):
-                mode = 'deny'
-                mod  = mod[1:]
-            elif (mod.startswith('+')):
-                mod  = mod[1:]
+        permissions = re.split('[ ]+', aclString.strip())
 
-            if '.' in mod:
-                resource, privilege = mod.split('.', 1)
-            else:
-                resource  = mod
-                privilege = '*'
+        if mode == 'add':
+            for permission in permissions:
+                if '.' in permission:
+                    resource, privilege = permission.split('.', 1)
+                else:
+                    resource  = permission
+                    privilege = '*'
 
-            if not self.resources.has_key(resource):
-                self.resources[resource] = {}
+                if not self.resources.has_key(resource):
+                    self.resources[resource] = {}
 
-            self.resources[resource][privilege] = (mode == 'allow')
+                self.resources[resource][privilege] = True
+        elif mode == 'remove':
+            for permission in permissions:
+                if '.' in permission:
+                    resource, privilege = permission.split('.', 1)
+                else:
+                    resource  = permission
+                    privilege = '*'
 
-        if not self.resources.has_key('*') or self.resources['*'].has_key('*'):
-            for resource, privileges in self.resources.iteritems():
-                if not privileges.has_key('*'):
-                    for privilege, mode in privileges.iteritems():
-                        if not mode:
-                            del self.resources[resource][privilege]
-        else:
-            for resource, privileges in self.resources.iteritems():
-                for privilege, mode in privileges.iteritems():
-                    if resource == '*' and privilege == '*':
-                        continue
-                    elif mode:
-                        del self.resources[resource][privilege]
+                if not self.resources.has_key(resource):
+                    continue
 
-                if len(privileges) == 0:
-                    del self.resources[resource]
+                if self.resources[resource].has_key(privilege):
+                    del self.resources[resource][privilege]
 
-    def isAllowed(self, restrict):
-        resource, privilege = mod.split('.', 1)
+    def isAllowed(self, permission):
+        resource, privilege = permission.split('.', 1)
 
-        allowed = False
+        if self.resources.has_key('*') and \
+            (self.resources['*'].has_key('*') or \
+            self.resources['*'].has_key(privilege)):
+            return True
 
-        if self.resources.has_key('*'):
-            if self.resources['*'].has_key('*'):
-                allowed = True
+        if self.resources.has_key(resource) and \
+            (self.resources[resource].has_key('*') or \
+            self.resources[resource].has_key(privilege)):
+            return True
 
-            if self.resources['*'].has_key(privilege):
-                allowed = self.resources['*'][privilege]
-
-        if self.resources.has_key(resource):
-            if self.resources[resource].has_key('*'):
-                allowed = True
-
-            if self.resources[resource].has_key(privilege):
-                allowed = self.resources[resource][privilege]
-
-        return allowed
+        return False
 
     def __repr__(self):
-        mods = []
+        permissions = []
 
         for resource, privileges in self.resources.iteritems():
             for privilege, mode in privileges.iteritems():
-                mods.append(('' if mode else '-') + resource + '.' + privilege)
+                permissions.append(('' if mode else '-') + resource + '.' + privilege)
 
-        return ' '.join(mods)
+        return ' '.join(permissions)
 
 

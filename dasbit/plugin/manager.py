@@ -114,14 +114,23 @@ class Manager:
             if not self.plugins[command['plugin']]['enabled']:
                 return
 
-            # Todo: check for permissions
-
-            if command['arguments'] is not None:
-                match = command['arguments'].match(arguments)
-
-                if match is None:
-                    return
-
-                command['callback'](message, **match.groupdict())
+            if command['permission'] is not None:
+                d = self.plugins['user']['instance'].verifyAccess(message, command['plugin'] + '.' + command['permission'])
+                d.addCallback(self._executeCommand, message, command, arguments)
             else:
-                command['callback'](message)
+                self._executeCommand(True, message, command, arguments)
+
+    def _executeCommand(self, isAllowed, message, command, arguments):
+        if not isAllowed:
+            self.client.reply(message, 'You are not allowed to use this command', 'notice')
+            return
+
+        if command['arguments'] is not None:
+            match = command['arguments'].match(arguments)
+
+            if match is None:
+                return
+
+            command['callback'](message, **match.groupdict())
+        else:
+            command['callback'](message)
