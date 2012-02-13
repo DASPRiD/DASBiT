@@ -36,7 +36,7 @@ class Twitter:
             text = data['status']['text']
             id   = data['status']['id_str']
 
-        url = 'https://twitter.com/%s/status/%s' % (user, id)
+        url = 'https://twitter.com/#!/%s/status/%s' % (user, id)
 
         self.client.reply(source, '<%s> %s (%s)' % (user, text, url))
 
