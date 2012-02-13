@@ -11,6 +11,7 @@ class Manager:
         self.plugins       = {}
         self.commands      = {}
         self.numericEvents = []
+        self.messageEvents = {}
 
         packagePath = os.path.dirname(dasbit.plugin.__file__)
 
@@ -79,8 +80,17 @@ class Manager:
             'callback': callback
         })
 
+    def registerMessage(self, plugin, callback):
+        self.messageEvents[plugin] = callback
+
     def testMessage(self, message):
         self._testMessageForCommand(message)
+
+        for plugin, callback in self.messageEvents.iteritems():
+            if not self.plugins[plugin]['enabled']:
+                continue
+
+            callback(message)
 
     def testNumericEvent(self, message):
         for event in self.numericEvents:

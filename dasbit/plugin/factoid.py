@@ -3,8 +3,8 @@ from dasbit.core import Config
 
 class Factoid:
     def __init__(self, manager):
-        self.client  = manager.client
-        self.config  = Config(os.path.join(manager.dataPath, 'factoid'))
+        self.client = manager.client
+        self.config = Config(os.path.join(manager.dataPath, 'factoid'))
 
         manager.registerCommand('factoid', 'add', 'factoid-add', '(?:(?P<channel>#[^ ]+) )?(?P<key>.+?) => (?P<value>.+?)', self.add)
         manager.registerCommand('factoid', 'remove', 'factoid-remove', '(?:(?P<channel>#[^ ]+) )?(?P<key>.+?)', self.remove)
