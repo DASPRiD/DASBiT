@@ -1,13 +1,11 @@
 import os
-import re
-from twisted.internet import defer
 from dasbit.core import Config
 
 class Channel:
     def __init__(self, manager):
         self.manager = manager
         self.client  = manager.client
-        self.config  = Config(os.path.join(self.manager.dataPath, 'channel'))
+        self.config  = Config(os.path.join(manager.dataPath, 'channel'))
 
         manager.registerCommand('channel', 'join', 'channel-join', '(?P<channel>[^ ]+)(?: (?P<key>.+))?', self.join)
         manager.registerCommand('channel', 'part', 'channel-part', '(?P<channel>[^ ]+)', self.part)

@@ -1,17 +1,33 @@
+import os
 from twisted.web.client import getPage
 from urllib import urlencode
 import json
+from dasbit.core import Config
 
 class Manual:
     def __init__(self, manager):
         self.client = manager.client
+        self.config = Config(os.path.join(manager.dataPath, 'manual'))
 
+        manager.registerCommand('manual', 'set', 'manual-set', '(?P<channel>[^ ]+) (?P<url>[^ ]+)', self.setManualUrl)
         manager.registerCommand('manual', None, 'manual', '(?P<query>.*?)(?: for (?P<nickname>.+))?', self.search)
 
+    def setManualUrl(self, source, channel, url):
+        self.config[channel] = url
+        self.config.save()
+
+        self.client.reply(source, 'Manual URL has been set', 'notice')
+
     def search(self, source, query, nickname = None):
+        if not self.config.has_key(source.target):
+            self.client.reply(source, 'No manual URL has been set for this channel', 'notice')
+            return
+
+        manualUrl = self.config[source.target]
+
         params = urlencode({
             'v': '1.0',
-            'q': query + ' site:http://framework.zend.com/manual/en/'
+            'q': query + ' site:' + manualUrl
         })
 
         url = 'http://ajax.googleapis.com/ajax/services/search/web?' + params
