@@ -16,7 +16,7 @@ class Help:
             self.client.reply(source, 'For help about plugins, type !help <plugin>. The available plugins are: %s' % ', '.join(pluginNames), 'notice')
         elif plugin in self.manager.plugins and self.manager.plugins[plugin]['enabled']:
             pluginInstance = self.manager.plugins[plugin]['instance']
-            print pluginInstance.__class__.help
+
             if hasattr(pluginInstance.__class__, 'help'):
                 self.client.reply(source, 'Help for plugin %s: %s' % (plugin, pluginInstance.__class__.help), 'notice')
             else:
