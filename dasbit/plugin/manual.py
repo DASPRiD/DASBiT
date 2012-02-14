@@ -10,7 +10,7 @@ class Manual:
         self.config = Config(os.path.join(manager.dataPath, 'manual'))
 
         manager.registerCommand('manual', 'set', 'manual-set', '(?P<channel>[^ ]+) (?P<url>[^ ]+)', self.setManualUrl)
-        manager.registerCommand('manual', None, 'manual', '(?P<query>.*?)(?: for (?P<nickname>.+))?', self.search)
+        manager.registerCommand('manual', 'search', 'manual', '(?P<query>.*?)(?: for (?P<nickname>.+))?', self.search)
 
     def setManualUrl(self, source, channel, url):
         self.config[channel] = url

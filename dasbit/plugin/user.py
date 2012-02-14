@@ -4,6 +4,8 @@ from twisted.internet import defer
 from dasbit.core import Config
 
 class User:
+    help = 'https://github.com/DASPRiD/DASBiT/wiki/User-Plugin'
+
     def __init__(self, manager):
         self.manager = manager
         self.client  = manager.client
@@ -66,6 +68,9 @@ class User:
             self.client.reply(source, 'No ACL for %s found' % username, 'notice')
 
     def verifyAccess(self, source, permission):
+        if '*' in self.acl and self.acl['*'].isAllowed(permission):
+            return True
+
         rd = defer.Deferred()
 
         d = defer.maybeDeferred(self._determineUsername, source.prefix)

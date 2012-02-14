@@ -6,7 +6,7 @@ class Twitter:
     def __init__(self, manager):
         self.client = manager.client
 
-        manager.registerCommand('twitter', None, 'twitter', '(?P<query>.*?)', self.lookup)
+        manager.registerCommand('twitter', 'lookup', 'twitter', '(?P<query>.*?)', self.lookup)
 
     def lookup(self, source, query):
         if query.isdigit():

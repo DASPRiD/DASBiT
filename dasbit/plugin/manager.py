@@ -3,6 +3,7 @@ import pkgutil
 import inspect
 import re
 import dasbit.plugin
+from twisted.internet import defer
 from twisted.internet import reactor
 
 class Manager:
@@ -38,6 +39,7 @@ class Manager:
 
         self.plugins['plugin']['enabled'] = True
         self.plugins['user']['enabled'] = True
+        self.plugins['help']['enabled'] = True
 
     def enablePlugin(self, plugin):
         if self.plugins.has_key(plugin):
@@ -52,7 +54,7 @@ class Manager:
             return (False, 'Plugin %s does not exist' % plugin)
 
     def disablePlugin(self, plugin):
-        if plugin in ['plugin', 'user']:
+        if plugin in ['plugin', 'user', 'help']:
             return (False, 'Plugin %s cannot be disabled' % plugin)
 
         if self.plugins.has_key(plugin):
@@ -137,7 +139,11 @@ class Manager:
                 return
 
             if command['permission'] is not None:
-                d = self.plugins['user']['instance'].verifyAccess(message, command['plugin'] + '.' + command['permission'])
+                d = defer.maybeDeferred(
+                    self.plugins['user']['instance'].verifyAccess,
+                    message,
+                    command['plugin'] + '.' + command['permission']
+                )
                 d.addCallback(self._executeCommand, message, command, arguments)
             else:
                 self._executeCommand(True, message, command, arguments)
