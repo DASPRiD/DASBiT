@@ -3,6 +3,7 @@ import pkgutil
 import inspect
 import re
 import dasbit.plugin
+from twisted.internet import reactor
 
 class Manager:
     def __init__(self, client, dataPath):
@@ -82,6 +83,17 @@ class Manager:
 
     def registerMessage(self, plugin, callback):
         self.messageEvents[plugin] = callback
+
+    def registerInterval(self, plugin, interval, callback):
+        reactor.callLater(interval, self._intervalCallback, plugin, interval, callback)
+
+    def _intervalCallback(self, plugin, interval, callback):
+        if not self.plugins[plugin]['enabled']:
+            return
+
+        callback()
+
+        reactor.callLater(interval, self._intervalCallback, plugin, interval, callback)
 
     def testMessage(self, message):
         self._testMessageForCommand(message)

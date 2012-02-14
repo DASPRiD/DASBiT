@@ -46,7 +46,7 @@ class Client:
         self.send('QUIT', '', 100, 0)
 
     def disconnect(self):
-        self.transport.loseConnection()
+        self._protocol.transport.loseConnection()
 
     def send(self, command, params, priority = 0, penalty = 0):
         if self._protocol is None:
@@ -144,7 +144,11 @@ class Client:
             self._sendPenalty -= penalty
             self._protocol.send(command, params)
 
-        self._sendDelayedCall = reactor.callLater(1, self._sendQueued)
+        if self._sendDelayedCall is None or raisePenalty:
+            if self._sendPenalty < 10 or not self._sendQueue.empty():
+                self._sendDelayedCall = reactor.callLater(1, self._sendQueued)
+            else:
+                self._sendDelayedCall = None
 
     def _checkForLag(self):
         if self._lastTimeReceived + 300 <= time():
@@ -159,14 +163,17 @@ class Client:
         self._sendQueue        = PriorityQueue()
         self._sendPenalty      = 10
 
+        self._lagDelayedCall  = reactor.callLater(60, self._checkForLag);
+        self._sendDelayedCall = None
+
         self.send('NICK', self.config['nickname'], 100, 1)
         self.send('USER', [self.config['username'], '-', '-', 'DASBiT'], 100, 1)
 
-        self._lagDelayedCall  = reactor.callLater(60, self._checkForLag);
-        self._sendDelayedCall = reactor.callLater(1, self._sendQueued)
-
     def onProtocolConnectionLost(self):
-        self._sendDelayedCall.cancel()
+        if self._sendDelayedCall is not None:
+            self._sendDelayedCall.cancel()
+            self._sendDelayedCall = None
+
         self._lagDelayedCall.cancel()
 
         self._protocol  = None
