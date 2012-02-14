@@ -14,11 +14,11 @@ class Factoid:
         channel = source.target.lower()
         key     = key.lower()
 
-        if self.config.has_key(channel) and \
-            self.config[channel].has_key(key):
+        if channel in self.config and \
+            key in self.config[channel]:
             value = self.config[channel][key]
-        elif self.config.has_key('global') and \
-            self.config['global'].has_key(key):
+        elif 'global' in self.config and \
+            key in self.config['global']:
             value = self.config['global'][key]
         else:
             self.client.reply(source, 'Factoid "%s" not found' % key, 'notice')
@@ -34,7 +34,7 @@ class Factoid:
 
         key = key.lower()
 
-        if not self.config.has_key(group):
+        if not group in self.config:
             self.config[group] = {}
 
         self.config[group][key] = value
@@ -50,8 +50,8 @@ class Factoid:
 
         key = key.lower()
 
-        if not self.config.has_key(group) or \
-            not self.config[group].has_key(key):
+        if not group in self.config or \
+            not key in self.config[group]:
             self.client.reply(source, 'Factoid "%s" not found in %s' % (key, group), 'notice')
             return
 

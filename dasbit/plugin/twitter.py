@@ -23,7 +23,7 @@ class Twitter:
             self.client.reply(source, 'An error occured while processing the result', 'notice')
             return
 
-        if data.has_key('error'):
+        if 'error' in data:
             self.client.reply(source, 'An error occured while processing the result', 'notice')
             return
 
