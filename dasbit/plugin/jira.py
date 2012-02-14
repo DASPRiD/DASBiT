@@ -34,7 +34,7 @@ class Jira:
             'channel':         channel,
             'url':             url,
             'project':         project,
-            'last-issue-time': time.time() - 3600 * 24 * 30
+            'last-issue-time': time.time()
         })
         self.config.save()
 
@@ -55,7 +55,6 @@ class Jira:
         self.client.reply(source, 'Could not find project', 'notice')
 
     def watchForUpdates(self):
-        print 'watch called'
         for instance in self.config['instances']:
             d = self._getIssueUpdates(instance['url'], instance['project'], instance['last-issue-time'])
             d.addCallback(self._updatesReceived, instance)
