@@ -31,16 +31,21 @@ class Frontend:
     def _runConfigPrompt(self, config):
         print "Initial setup required."
 
+        if sys.version_info[0] >= 3:
+            get_input = input
+        else:
+            get_input = raw_input
+
         while True:
-            config['hostname'] = raw_input('Hostname: ')
+            config['hostname'] = get_input('Hostname: ')
 
             if config['hostname']:
                 break
 
-        config['port']          = raw_input('Port [6667]: ')
-        config['nickname']      = raw_input('Nickname [DASBiT]: ')
-        config['username']      = raw_input('Username [dasbit]: ')
-        config['commandPrefix'] = raw_input('Command prefix [!]: ')
+        config['port']          = get_input('Port [6667]: ')
+        config['nickname']      = get_input('Nickname [DASBiT]: ')
+        config['username']      = get_input('Username [dasbit]: ')
+        config['commandPrefix'] = get_input('Command prefix [!]: ')
 
         if not config['port']:
             config['port'] = 6667
