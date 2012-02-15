@@ -23,7 +23,7 @@ class Frontend:
         # Check for configuration
         config = Config(os.path.join(self._dataPath, 'config'))
 
-        if not config.has_key('hostname'):
+        if not 'hostname' in config:
             config = self._runConfigPrompt(config)
 
         self._dispatch(config)

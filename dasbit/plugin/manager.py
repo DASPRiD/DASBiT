@@ -30,9 +30,9 @@ class Manager:
                         'enabled':  False
                     }
 
-        if client.config.has_key('plugins'):
+        if 'plugins' in client.config:
             for plugin, enabled in client.config['plugins'].iteritems():
-                if self.plugins.has_key(plugin):
+                if plugin in self.plugins:
                     self.plugins[plugin]['enabled'] = enabled
         else:
             client.config['plugins'] = {}
@@ -42,7 +42,7 @@ class Manager:
         self.plugins['help']['enabled'] = True
 
     def enablePlugin(self, plugin):
-        if self.plugins.has_key(plugin):
+        if plugin in self.plugins:
             if self.plugins[plugin]['enabled']:
                 return (False, 'Plugin %s is already enabled' % plugin)
             else:
@@ -57,7 +57,7 @@ class Manager:
         if plugin in ['plugin', 'user', 'help']:
             return (False, 'Plugin %s cannot be disabled' % plugin)
 
-        if self.plugins.has_key(plugin):
+        if plugin in self.plugins:
             if not self.plugins[plugin]['enabled']:
                 return (False, 'Plugin %s is already disabled' % plugin)
             else:
@@ -132,7 +132,7 @@ class Manager:
             command   = data[0]
             arguments = data[1]
 
-        if self.commands.has_key(command):
+        if command in self.commands:
             command = self.commands[command]
 
             if not self.plugins[command['plugin']]['enabled']:

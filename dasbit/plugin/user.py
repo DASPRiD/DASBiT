@@ -51,7 +51,7 @@ class User:
         self._storeAcl(source, username, aclString, 'remove')
 
     def _storeAcl(self, source, username, aclString, mode):
-        if self.acl.has_key(username):
+        if username in self.acl:
             self.acl[username].modify(aclString, mode)
         elif mode != 'remove':
             self.acl[username] = Acl(aclString)
@@ -62,7 +62,7 @@ class User:
         self.client.reply(source, 'ACL has been modified', 'notice')
 
     def showAcl(self, source, username):
-        if self.acl.has_key(username):
+        if username in self.acl:
             self.client.reply(source, 'ACL for %s: %s' % (username, repr(self.acl[username])), 'notice')
         else:
             self.client.reply(source, 'No ACL for %s found' % username, 'notice')
@@ -79,16 +79,16 @@ class User:
         return rd
 
     def _checkAcl(self, username, rd, permission):
-        if not self.acl.has_key(username):
+        if not username in self.acl:
             rd.callback(False)
         else:
             rd.callback(self.acl[username].isAllowed(permission))
 
     def _determineUsername(self, prefix):
-        if self.identToUsername.has_key(prefix['ident']):
+        if prefix['ident'] in self.identToUsername:
             return self.identToUsername[prefix['ident']]
 
-        if not self.nicknameDefers.has_key(prefix['nickname']):
+        if not prefix['nickname'] in self.nicknameDefers:
             self.nicknameToIdent[prefix['nickname']] = prefix['ident']
             self.client.send('WHOIS', prefix['nickname'])
 
@@ -103,13 +103,13 @@ class User:
 
             self.identToUsername[self.nicknameToIdent[nickname]] = username
 
-            if self.nicknameDefers.has_key(nickname):
+            if nickname in self.nicknameDefers:
                 self.nicknameDefers[nickname].callback(username)
                 del self.nicknameDefers[nickname]
         elif message.command == 318:
             nickname = message.args[1]
 
-            if self.nicknameDefers.has_key(nickname):
+            if nickname in self.nicknameDefers:
                 self.client.sendNotice(nickname, 'You are not identified with NickServ')
 
                 del self.nicknameDefers[nickname]
@@ -139,7 +139,7 @@ class Acl:
                     resource  = permission
                     privilege = '*'
 
-                if not self.resources.has_key(resource):
+                if not resource in self.resources:
                     self.resources[resource] = {}
 
                 self.resources[resource][privilege] = True
@@ -151,23 +151,23 @@ class Acl:
                     resource  = permission
                     privilege = '*'
 
-                if not self.resources.has_key(resource):
+                if not resource in self.resources:
                     continue
 
-                if self.resources[resource].has_key(privilege):
+                if privilege in self.resources[resource]:
                     del self.resources[resource][privilege]
 
     def isAllowed(self, permission):
         resource, privilege = permission.split('.', 1)
 
-        if self.resources.has_key('*') and \
-            (self.resources['*'].has_key('*') or \
-            self.resources['*'].has_key(privilege)):
+        if '*' in self.resources and \
+            ('*' in self.resources['*'] or \
+            privilege in self.resources['*']):
             return True
 
-        if self.resources.has_key(resource) and \
-            (self.resources[resource].has_key('*') or \
-            self.resources[resource].has_key(privilege)):
+        if resource in self.resources and \
+            ('*' in self.resources[resource] or \
+            privilege in self.resources[resource]):
             return True
 
         return False

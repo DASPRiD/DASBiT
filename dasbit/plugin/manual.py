@@ -19,7 +19,7 @@ class Manual:
         self.client.reply(source, 'Manual URL has been set', 'notice')
 
     def search(self, source, query, nickname = None):
-        if not self.config.has_key(source.target):
+        if not source.target in self.config:
             self.client.reply(source, 'No manual URL has been set for this channel', 'notice')
             return
 
@@ -44,8 +44,8 @@ class Manual:
             self.client.reply(source, 'An error occured while processing the result', 'notice')
             return
 
-        if not data.has_key('responseData') or \
-            not data['responseData'].has_key('results') or \
+        if not 'responseData' in data or \
+            not 'results' in data['responseData'] or \
             len(data['responseData']['results']) == 0:
             self.client.reply(source, 'Nothing found')
         else:

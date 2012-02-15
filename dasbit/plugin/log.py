@@ -24,21 +24,21 @@ class Log:
         self.client.reply(source, 'Logging has been enabled for %s' % channel, 'notice')
 
     def disable(self, source, channel):
-        if not self.config.has_key(channel):
+        if not channel in self.config:
             self.client.reply(source, 'Logging is not enabled for %s' % channel, 'notice')
             return
 
         del self.config[channel]
         self.config.save()
 
-        if self.logs.has_key(channel):
+        if channel in self.logs:
             self.logs[channel]['fp'].close()
             del self.logs[channel]
 
         self.client.reply(source, 'Logging has been disabled for %s' % channel, 'notice')
 
     def logMessage(self, message):
-        if not self.config.has_key(message.target):
+        if not message.target in self.config:
             return
 
         channel   = message.target
@@ -46,7 +46,7 @@ class Log:
         nowStruct = time.gmtime(now)
         date      = time.strftime('%Y-%m-%d', nowStruct)
 
-        if not self.logs.has_key(channel):
+        if not channel in self.logs:
             self.logs[channel] = {
                 'date': date,
                 'fp':   None

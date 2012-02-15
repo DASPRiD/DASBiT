@@ -22,7 +22,7 @@ class Channel:
         self.client.reply(source, 'Joined %s' % channel, 'notice')
 
     def part(self, source, channel):
-        if not self.config.has_key(channel):
+        if not channel in self.config:
             self.client.reply(source, 'Not present in channel %s' % channel, 'notice')
             return
 
@@ -40,6 +40,6 @@ class Channel:
     def channelError(self, message):
         channel = message.args[0]
 
-        if self.config.has_key(channel):
+        if channel in self.config:
             del self.config[channel]
             self.config.save()
