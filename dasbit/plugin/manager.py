@@ -135,7 +135,7 @@ class Manager:
         if not command in self.commands:
             commandMatches = []
             for commandName in self.commands:
-                if re.match(command, commandName) \
+                if commandName.startswith(command) \
                     and self.plugins[self.commands[commandName]['plugin']]['enabled']:
                     commandMatches.append(commandName)
 
