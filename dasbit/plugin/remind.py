@@ -36,3 +36,4 @@ class Remind:
             )
 
         del self.config[nickname]
+        self.config.save()
