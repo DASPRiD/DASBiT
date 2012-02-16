@@ -6,7 +6,7 @@ class Remind:
         self.client = manager.client
         self.config = Config(os.path.join(manager.dataPath, 'remind'))
 
-        manager.registerCommand('remind', 'remind', 'remind', '(?P<nickname>[^ ]+) (?P<message>(?:to|about) .+)', self.remind)
+        manager.registerCommand('remind', 'remind', 'remind', '(?P<nickname>[^ ]+) (?P<message>(?:to|about|that) .+)', self.remind)
         manager.registerMessage('remind', self.checkReminder)
 
     def remind(self, source, nickname, message):
