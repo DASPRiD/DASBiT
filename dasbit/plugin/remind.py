@@ -17,6 +17,7 @@ class Remind:
             'message': message,
             'from':    source.prefix['nickname']
         })
+        self.config.save()
 
         self.client.reply(source, 'Reminder stored', 'notice')
 
