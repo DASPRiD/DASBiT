@@ -18,7 +18,7 @@ class Remind:
             'from':    source.prefix['nickname']
         })
 
-        self.client.reply(source, 'Reminder stored')
+        self.client.reply(source, 'Reminder stored', 'notice')
 
     def checkReminder(self, message):
         if not message.prefix['nickname'] in self.config:
