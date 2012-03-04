@@ -72,7 +72,7 @@ class Jira:
 
             self.client.sendPrivMsg(
                 instance['channel'],
-                '[Issue-Update:%s] [Type:%s] [Status:%s] [Component:%s] %s (See: %s)' % (
+                '[Issue-Update:%s] [Type:%s] [Status:%s] [Component:%s] %s, see: %s' % (
                     issue['key'],
                     issue['type'],
                     issue['status'],
