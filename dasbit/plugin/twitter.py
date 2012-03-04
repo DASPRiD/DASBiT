@@ -11,8 +11,10 @@ class Twitter:
     def lookup(self, source, query):
         if query.isdigit():
             url = 'http://api.twitter.com/1/statuses/show/%s.json' % query
-        else:
+        elif len(query) > 0:
             url = 'http://api.twitter.com/1/users/show.json?%s' % urlencode({'screen_name' : query})
+        else:
+            url = 'http://api.twitter.com/1/users/show.json?%s' % urlencode({'screen_name' : source.prefix['nickname']})
 
         getPage(url).addCallback(self._returnResult, source, query.isdigit())
 
