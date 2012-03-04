@@ -132,6 +132,20 @@ class Manager:
             command   = data[0]
             arguments = data[1]
 
+        if not command in self.commands:
+            commandMatches = []
+            for commandName in self.commands:
+                if commandName.startswith(command) \
+                    and self.plugins[self.commands[commandName]['plugin']]['enabled']:
+                    commandMatches.append(commandName)
+
+            if len(commandMatches) > 1:
+                self.client.reply(message, 'Ambiguous command: !{0}. Try !{1}'.format(command, ', !'.join(commandMatches)), 'notice')
+                return
+            
+            if len(commandMatches) == 1:
+                command = commandMatches[0]
+
         if command in self.commands:
             command = self.commands[command]
 
