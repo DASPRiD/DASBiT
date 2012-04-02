@@ -1,7 +1,8 @@
 import os
 import time
+import re
 from calendar import timegm
-from urllib import urlencode
+from urllib import urlencode, quote_plus
 from xml.etree.ElementTree import XML
 from dasbit.core import Config
 from twisted.web.client import getPage
@@ -9,14 +10,16 @@ from twisted.internet import defer
 
 class Jira:
     def __init__(self, manager):
-        self.client = manager.client
-        self.config = Config(os.path.join(manager.dataPath, 'jira'))
+        self.client       = manager.client
+        self.config       = Config(os.path.join(manager.dataPath, 'jira'))
+        self.triggerRegex = re.compile('@(?P<key>[A-Za-z][A-Za-z0-9]*)-(?P<id>[1-9]\d*)')
 
         if not 'instances' in self.config:
             self.config['instances'] = []
 
         manager.registerCommand('jira', 'add', 'jira-add', '(?P<channel>[^ ]+) (?P<url>[^ ]+) (?P<project>[^ ]+)', self.add)
         manager.registerCommand('jira', 'remove', 'jira-remove', '(?P<channel>[^ ]+) (?P<project>[^ ]+)', self.remove)
+        manager.registerMessage('jira', self.lookup)
         manager.registerInterval('jira', 60, self.watchForUpdates)
 
     def add(self, source, channel, url, project):
@@ -53,6 +56,27 @@ class Jira:
                 return
 
         self.client.reply(source, 'Could not find project', 'notice')
+
+    def lookup(self, message):
+        matches = self.triggerRegex.finditer(message.message)
+        
+        if matches is None:
+            return
+
+        for match in matches:
+            result = match.groupdict()
+            found  = False
+
+            for index, instance in enumerate(self.config['instances']):
+                if instance['project'].lower() == result['key'].lower():
+                    d = self._fetchIssue(message, instance, result['id'])
+                    d.addCallback(self._reportIssue, message)
+                    d.addErrback(self._reportIssueFailure, message, result['key'] + '-' + result['id'])
+                    found = True
+                    break
+
+            if not found:
+                self.client.reply(message, 'Could not find issue %s' % (result['key'] + '-' + result['id']), 'notice')
 
     def watchForUpdates(self):
         for instance in self.config['instances']:
@@ -109,12 +133,47 @@ class Jira:
 
         rd = defer.Deferred()
         pd = getPage(url)
-        pd.addCallback(self._parseIssueUpdates, rd, timeStruct)
+        pd.addCallback(self._parseIssueFeed, rd)
         pd.addErrback(rd.errback)
 
         return rd
 
-    def _parseIssueUpdates(self, value, rd, lastIssueTime):
+    def _reportIssueFailure(self, failure, message, issueKey):
+        print failure
+        self.client.reply(message, 'Could not find issue %s' % issueKey, 'notice')
+
+    def _reportIssue(self, issues, message):
+        issue = issues[0]
+
+        self.client.reply(
+            message,
+            '[Issue:%s] [Type:%s] [Status:%s] [Component:%s] %s, see: %s' % (
+                issue['key'],
+                issue['type'],
+                issue['status'],
+                issue['component'],
+                issue['summary'],
+                issue['link']
+            )
+        )
+
+    def _fetchIssue(self, message, instance, id):
+        issueKey = instance['project'] + '-' + id
+
+        url = '%s/si/jira.issueviews:issue-xml/%s/%s.xml' % (
+            instance['url'],
+            quote_plus(issueKey),
+            quote_plus(issueKey)
+        )
+
+        rd = defer.Deferred()
+        pd = getPage(url)
+        pd.addCallback(self._parseIssueFeed, rd)
+        pd.addErrback(rd.errback)  
+
+        return rd
+
+    def _parseIssueFeed(self, value, rd):
         try:
             feed = XML(value)
         except:
