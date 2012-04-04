@@ -62,8 +62,6 @@ class Vote:
             self.votes[channel]['negatives'] += 1
         elif choice == '0':
             self.votes[channel]['neutrals'] += 1
-        else:
-            return
 
         self.votes[channel]['users'].append(message.prefix['ident'])
         self.client.reply(message, 'Your vote has been recorded', 'notice')
