@@ -1,7 +1,3 @@
-from twisted.web.client import getPage
-from urllib import urlencode
-import json
-
 class Vote:
     def __init__(self, manager):
         self.client = manager.client
