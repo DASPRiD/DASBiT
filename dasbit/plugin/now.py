@@ -1,13 +1,12 @@
-from __future__ import absolute_import
 import pytz
 import datetime
 from time import time
 
-class Time:
+class Now:
     def __init__(self, manager):
         self.client = manager.client
 
-        manager.registerCommand('time', 'time', 'time', '(?P<timezone>[^ ]+)?', self.getTime)
+        manager.registerCommand('now', 'time', 'time', '(?P<timezone>[^ ]+)?', self.getTime)
 
     def getTime(self, source, timezone):
         now = datetime.datetime.fromtimestamp(time(), pytz.utc)
