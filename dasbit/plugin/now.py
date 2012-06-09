@@ -39,6 +39,6 @@ class Now:
                 return
 
             now = now.astimezone(tz)
-
-        self.client.reply(source, now.strftime('%Y-%m-%d %H:%M:%S %Z%z'))
-
+            self.client.reply(source, '%s (%s)' % (now.strftime('%Y-%m-%d %H:%M:%S %Z%z'), timezone))
+        else:
+            self.client.reply(source, now.strftime('%Y-%m-%d %H:%M:%S %Z'))
