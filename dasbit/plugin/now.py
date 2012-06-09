@@ -20,6 +20,7 @@ class Now:
             return
 
         self.config[source.prefix['nickname']] = timezone
+        self.config.save()
 
         self.client.reply(source, 'Your timezone has been set', 'notice')
 
