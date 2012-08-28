@@ -61,6 +61,7 @@ class Ctcp:
     def unpackMessage(self, message):
         message         = self.lowLevelDequote(message)
         parts           = []
+        part            = ''
         length          = len(message)
         currentPos      = 0
         isExtended      = None
