@@ -16,9 +16,22 @@ class Seen:
         if not nickname in self.config:
             self.client.reply(source, 'I have never seen %s' % nickname)
 
-        self.client.reply(source, '%s was last seen %s' % (nickname, timesince(datetime.datetime.utcfromtimestamp(self.config[nickname]))))
+        if isinstance(self.config[nickname], dict):
+            self.client.reply(source, '%s was last seen %s in %s' % (
+                nickname,
+                timesince(datetime.datetime.utcfromtimestamp(self.config[nickname]['time'])),
+                self.config[nickname]['channel']
+            ))
+        else:
+            self.client.reply(source, '%s was last seen %s' % (
+                nickname,
+                timesince(datetime.datetime.utcfromtimestamp(self.config[nickname]))
+            ))
 
     def record(self, message):
-        self.config[message.prefix['nickname']] = time()
+        self.config[message.prefix['nickname']] = {
+            'channel': message.target,
+            'time':    time()
+        }
         self.config.save()
 
