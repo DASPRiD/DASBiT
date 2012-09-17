@@ -39,7 +39,7 @@ class Lastfm:
                     title  = track['name']
                     album  = track['album']['#text']
 
-                    self.client.reply(source, '%s is currenctly playing %s - %s (%s)' % (user, artist, title, album))
+                    self.client.reply(source, '%s is currently playing %s - %s (%s)' % (user, artist, title, album))
                     return
         except:
             pass
