@@ -139,7 +139,6 @@ class Jira:
         return rd
 
     def _reportIssueFailure(self, failure, message, issueKey):
-        print failure
         self.client.reply(message, 'Could not find issue %s' % issueKey, 'notice')
 
     def _reportIssue(self, issues, message):
