@@ -57,12 +57,15 @@ class Github:
 
     def watchForUpdates(self):
         for instance in self.config['instances']:
-            d = self._getIssueUpdates(instance['owner'], instance['repository'], instance['last-issue-time'])
-            d.addCallback(self._updatesReceived, instance)
+            d = self._getIssueUpdates(instance['owner'], instance['repository'], instance['last-issue-time'], 'open')
+            d.addCallback(self._updatesReceived, instance, instance['last-issue-time'])
 
-    def _updatesReceived(self, issues, instance):
-        lastIssueTime = time.gmtime(instance['last-issue-time'])
-        newIssueTime  = time.gmtime(instance['last-issue-time'])
+            d = self._getIssueUpdates(instance['owner'], instance['repository'], instance['last-issue-time'], 'closed')
+            d.addCallback(self._updatesReceived, instance, instance['last-issue-time'])
+
+    def _updatesReceived(self, issues, instance, lastIssueTime):
+        newIssueTime  = time.gmtime(lastIssueTime)
+        lastIssueTime = time.gmtime(lastIssueTime)
 
         for issue in issues:
             if issue['updated'] <= lastIssueTime:
@@ -78,9 +81,10 @@ class Github:
 
             self.client.sendPrivMsg(
                 instance['channel'],
-                '[Issue-Update:%s] [Labels:%s] %s, see: %s' % (
-                    issue['id'],
+                '[Issue-Update:%s] [Labels:%s] [State:%s] %s, see: %s' % (
+                    issue['number'],
                     labels,
+                    issue['state'],
                     issue['summary'],
                     issue['link']
                 )
@@ -89,13 +93,14 @@ class Github:
         instance['last-issue-time'] = timegm(newIssueTime)
         self.config.save()
 
-    def _getIssueUpdates(self, owner, repository, lastIssueTime):
+    def _getIssueUpdates(self, owner, repository, lastIssueTime, state):
         timeStruct = time.gmtime(lastIssueTime)
 
-        url = "https://api.github.com/repos/%s/%s/issues?sort=updated&since=%s" % (
+        url = "https://api.github.com/repos/%s/%s/issues?sort=updated&since=%s&state=%s" % (
             owner,
             repository,
-            time.strftime('%Y-%m-%dT%H:%M:%SZ', timeStruct)
+            time.strftime('%Y-%m-%dT%H:%M:%SZ', timeStruct),
+            state
         )
 
         rd = defer.Deferred()
@@ -124,9 +129,10 @@ class Github:
                     labels.append(label['name'])
 
             data.append({
-                'id':      issue['id'],
+                'number':  issue['number'],
                 'link':    issue['html_url'],
                 'summary': issue['title'],
+                'state':   issue['state'],
                 'labels':  labels,
                 'updated': timeStruct,
             })
