@@ -90,8 +90,11 @@ class Github:
                 )
             )
 
-        instance['last-issue-time'] = timegm(newIssueTime)
-        self.config.save()
+        newTimestamp = timegm(newIssueTime)
+
+        if newTimestamp > instance['last-issue-time']
+            instance['last-issue-time'] = newTimestamp
+            self.config.save()
 
     def _getIssueUpdates(self, owner, repository, lastIssueTime, state):
         timeStruct = time.gmtime(lastIssueTime)
