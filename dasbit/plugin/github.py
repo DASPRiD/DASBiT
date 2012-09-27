@@ -92,7 +92,7 @@ class Github:
 
         newTimestamp = timegm(newIssueTime)
 
-        if newTimestamp > instance['last-issue-time']
+        if newTimestamp > instance['last-issue-time']:
             instance['last-issue-time'] = newTimestamp
             self.config.save()
 
