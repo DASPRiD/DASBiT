@@ -25,7 +25,7 @@ class Github:
                 self.client.reply(source, 'This project is already watched', 'notice')
                 return
 
-        d = self._getIssueUpdates(owner, repository, time.time())
+        d = self._getIssueUpdates(owner, repository, time.time(), 'open')
         d.addCallback(self._addSuccess, source, channel, owner, repository)
         d.addErrback(self._addError, source)
 
