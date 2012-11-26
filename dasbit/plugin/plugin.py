@@ -5,6 +5,7 @@ class Plugin:
 
         manager.registerCommand('plugin', 'enable', 'plugin-enable', '(?P<plugin>[a-z]+)', self.enable)
         manager.registerCommand('plugin', 'disable', 'plugin-disable', '(?P<plugin>[a-z]+)', self.disable)
+        manager.registerCommand('plugin', 'reload', 'plugin-reload', '(?P<plugin>[a-z]+)', self.reload)
 
     def enable(self, source, plugin):
         success, message = self.manager.enablePlugin(plugin)
@@ -19,5 +20,13 @@ class Plugin:
 
         if success:
             self.client.reply(source, 'Plugin %s has been disabled' % plugin, 'notice')
+        else:
+            self.client.reply(source, message, 'notice')
+
+    def reload(self, source, plugin):
+        success, message = self.manager.reloadPlugin(plugin)
+
+        if success:
+            self.client.reply(source, 'Plugin %s has been reloaded' % plugin, 'notice')
         else:
             self.client.reply(source, message, 'notice')

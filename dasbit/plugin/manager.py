@@ -26,6 +26,7 @@ class Manager:
             for objectName, object in inspect.getmembers(module):
                 if inspect.isclass(object) and objectName.lower() == name:
                     self.plugins[name] = {
+                        'module':   module,
                         'instance': object(self),
                         'enabled':  False
                     }
@@ -65,6 +66,33 @@ class Manager:
                 self.client.config['plugins'][plugin]  = False
                 self.client.config.save()
                 return (True, None)
+        else:
+            return (False, 'Plugin %s does not exist' % plugin)
+
+    def reloadPlugin(self, plugin):
+        if plugin in ['plugin', 'user', 'help']:
+            return (False, 'Plugin %s cannot be reloaded' % plugin)
+
+        if plugin in self.plugins:
+            # First remove all registered commands and events
+            for key, command in self.commands.items():
+                if command['plugin'] == plugin:
+                    del self.commands[key]
+
+            self.numericEvents = [ x for x in self.numericEvents if x['plugin'] == plugin]
+
+            if plugin in self.messageEvents:
+                del self.messageEvents[plugin]
+
+            # Then reload the plugin
+            module = reload(self.plugins[plugin]['module'])
+
+            for objectName, object in inspect.getmembers(module):
+                if inspect.isclass(object) and objectName.lower() == plugin:
+                    self.plugins[plugin]['module']   = module
+                    self.plugins[plugin]['instance'] = object(self)
+
+            return (True, None)
         else:
             return (False, 'Plugin %s does not exist' % plugin)
 
