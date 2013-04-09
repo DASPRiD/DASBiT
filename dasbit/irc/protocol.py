@@ -48,7 +48,7 @@ class Protocol(BaseProtocol):
 
         print '> ' + message.strip()
 
-        self.transport.write(message.encode('utf-8'))
+        self.transport.write(message)
 
     def _parseLine(self, line):
         # General parsing
