@@ -17,7 +17,7 @@ class Github:
 
         manager.registerCommand('github', 'add', 'github-add', '(?P<channel>[^ ]+) (?P<owner>[^ ]+) (?P<repository>[^ ]+)', self.add)
         manager.registerCommand('github', 'remove', 'github-remove', '(?P<channel>[^ ]+) (?P<owner>[^ ]+) (?P<repository>[^ ]+)', self.remove)
-        manager.registerInterval('github', 60, self.watchForUpdates)
+        manager.registerInterval('github', 180, self.watchForUpdates)
 
     def add(self, source, channel, owner, repository):
         for instance in self.config['instances']:
