@@ -46,6 +46,9 @@ class Protocol(BaseProtocol):
 
         message += '\r\n'
 
+        if isinstance(message, unicode):
+            message = message.encode('utf-8')
+
         print '> ' + message.strip()
 
         self.transport.write(message)
