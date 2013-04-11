@@ -58,9 +58,14 @@ class Github:
         for instance in self.config['instances']:
             d = self._getIssueUpdates(instance['owner'], instance['repository'], instance['last-issue-time'], 'open')
             d.addCallback(self._updatesReceived, instance, instance['last-issue-time'])
+            d.addErrback(self._watchError)
 
             d = self._getIssueUpdates(instance['owner'], instance['repository'], instance['last-issue-time'], 'closed')
             d.addCallback(self._updatesReceived, instance, instance['last-issue-time'])
+            d.addErrback(self._watchError)
+
+    def _watchError(self, failure):
+        print 'Failure while watching for Github updates'
 
     def _updatesReceived(self, issues, instance, lastIssueTime):
         newIssueTime  = time.gmtime(lastIssueTime)
