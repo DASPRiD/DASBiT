@@ -41,7 +41,6 @@ class Github:
         self.client.reply(source, 'Project added for watching', 'notice')
 
     def _addError(self, failure, source):
-        print failure
         self.client.reply(source, 'Could not reach Github instance', 'notice')
 
     def remove(self, source, channel, owner, repository):
