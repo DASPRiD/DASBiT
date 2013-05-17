@@ -1,10 +1,12 @@
 from twisted.web.client import getPage
 from urllib import urlencode
 import json
+import HTMLParser
 
 class Twitter:
     def __init__(self, manager):
         self.client = manager.client
+        self.parser = HTMLParser.HTMLParser()
 
         manager.registerCommand('twitter', 'lookup', 'twitter', '(?P<query>.*?)', self.lookup)
 
@@ -37,6 +39,8 @@ class Twitter:
             user = data['screen_name']
             text = data['status']['text']
             id   = data['status']['id_str']
+
+        text = self.parser.unescape(text).replace('\n', ' ').replace('\r', '')
 
         url = 'https://twitter.com/#!/%s/status/%s' % (user, id)
 
