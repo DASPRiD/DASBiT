@@ -15,7 +15,7 @@ class Twitter:
         if not 'aliases' in self.config:
             self.config['aliases'] = {}
 
-        manager.registerCommand('twitter', 'authenticate', 'alias-twitter', '(?P<handle>[^ ]+)', self.alias)
+        manager.registerCommand('twitter', 'alias', 'alias-twitter', '(?P<handle>[^ ]+)', self.alias)
         manager.registerCommand('twitter', 'authenticate', 'authenticate-twitter', '(?P<key>[a-zA-Z0-9]+) (?P<secret>[a-zA-Z0-9]+)', self.authenticate)
         manager.registerCommand('twitter', 'lookup', 'twitter', '(?P<query>.*?)', self.lookup)
 
