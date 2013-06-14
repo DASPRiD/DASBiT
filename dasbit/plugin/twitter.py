@@ -12,8 +12,18 @@ class Twitter:
         self.parser = HTMLParser.HTMLParser()
         self.config = Config(os.path.join(manager.dataPath, 'twitter'))
 
+        if not 'aliases' in self.config:
+            self.config['aliases'] = {}
+
+        manager.registerCommand('twitter', 'authenticate', 'alias-twitter', '(?P<handle>[^ ]+)', self.alias)
         manager.registerCommand('twitter', 'authenticate', 'authenticate-twitter', '(?P<key>[a-zA-Z0-9]+) (?P<secret>[a-zA-Z0-9]+)', self.authenticate)
         manager.registerCommand('twitter', 'lookup', 'twitter', '(?P<query>.*?)', self.lookup)
+
+    def alias(self, source, handle):
+        self.config['aliases'][source.prefix['nickname']] = handle
+        print self.config['aliases']
+        self.config.save()
+        self.client.reply(source, 'Alias stored', 'notice')
 
     def authenticate(self, source, key, secret):
         bearerTokenCredentials = base64.b64encode('%s:%s' % (quote_plus(key), quote_plus(secret)))
@@ -75,7 +85,13 @@ class Twitter:
         elif len(query) > 0:
             url = 'https://api.twitter.com/1.1/users/show.json?%s' % urlencode({'screen_name' : query})
         else:
-            url = 'https://api.twitter.com/1.1/users/show.json?%s' % urlencode({'screen_name' : source.prefix['nickname']})
+            print self.config['aliases']
+            if source.prefix['nickname'] in self.config['aliases']:
+                handle = self.config['aliases'][source.prefix['nickname']]
+            else:
+                handle = source.prefix['nickname']
+
+            url = 'https://api.twitter.com/1.1/users/show.json?%s' % urlencode({'screen_name' : handle})
 
         getPage(
             url,
