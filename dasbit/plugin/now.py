@@ -29,17 +29,18 @@ class Now:
 
         if identifier:
             if identifier in self.config:
-                timezone = self.config[identifier]
+                timezone   = self.config[identifier]
             else:
-                timezone = identifier
+                timezone   = identifier
 
             try:
                 tz = pytz.timezone(timezone)
             except pytz.UnknownTimeZoneError:
-                self.client.reply(source, '%s is not a valid timezone' % timezone, 'notice')
+                self.client.reply(source, '%s is not a valid timezone or identifier' % timezone, 'notice')
                 return
 
             now = now.astimezone(tz)
-            self.client.reply(source, '%s (%s)' % (now.strftime('%Y-%m-%d %H:%M:%S %Z%z'), timezone))
+            
+            self.client.reply(source, 'Time for %s: %s' % (identifier, now.strftime('%A, %H:%M (%Z%z)')))
         else:
-            self.client.reply(source, now.strftime('%Y-%m-%d %H:%M:%S %Z'))
+            self.client.reply(source, 'Current time: %s' % now.strftime('%A, %H:%M (%Z%z)'))
