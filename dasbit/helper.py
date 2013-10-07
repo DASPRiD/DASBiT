@@ -1,6 +1,6 @@
 import datetime
 
-def timesince(date):
+def timesince(date, suffix=' ago'):
     chunks = (
         (60 * 60 * 24 * 365, lambda n: 'year' if n is 1 else 'years'),
         (60 * 60 * 24 * 30, lambda n: 'month' if n is 1 else 'months'),
@@ -15,7 +15,7 @@ def timesince(date):
     since = delta.days * 24 * 60 * 60 + delta.seconds
 
     if since <= 0:
-        return '0 minutes ago'
+        return '0 minutes' + suffix
 
     for i, (seconds, name) in enumerate(chunks):
         count = since // seconds
@@ -32,6 +32,6 @@ def timesince(date):
         if count2 != 0:
             s += ' and %d %s' % (count2, name2(count2))
 
-    s += ' ago'
+    s += suffix
 
     return s
