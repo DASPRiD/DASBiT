@@ -118,10 +118,8 @@ class Manager:
         reactor.callLater(interval, self._intervalCallback, plugin, interval, callback)
 
     def _intervalCallback(self, plugin, interval, callback):
-        if not self.plugins[plugin]['enabled']:
-            return
-
-        callback()
+        if self.plugins[plugin]['enabled']:
+            callback()
 
         reactor.callLater(interval, self._intervalCallback, plugin, interval, callback)
 
