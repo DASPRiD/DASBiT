@@ -7,6 +7,8 @@ import json
 import HTMLParser
 
 class Twitter:
+    help = 'https://github.com/DASPRiD/DASBiT/wiki/Twitter-Plugin'
+
     def __init__(self, manager):
         self.client = manager.client
         self.parser = HTMLParser.HTMLParser()
