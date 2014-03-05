@@ -5,6 +5,8 @@ from time import time
 from dasbit.core import Config
 
 class Now:
+    help = 'https://github.com/DASPRiD/DASBiT/wiki/Now-Plugin'
+
     def __init__(self, manager):
         self.client = manager.client
         self.config = Config(os.path.join(manager.dataPath, 'now'))
