@@ -18,6 +18,9 @@ The following plugins are shipped with DASBiT:
 - plugins: plugin management
 - channels: joining and parting channels
 
+
+See the [wiki](https://github.com/DASPRiD/DASBiT/wiki/Plugins) for a full list and help on plugins
+
 License
 -------
 The files in thios archive are released under the new BSD license that is
