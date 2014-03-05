@@ -9,6 +9,8 @@ from twisted.web.client import getPage
 from twisted.internet import defer
 
 class Jira:
+    help = 'https://github.com/DASPRiD/DASBiT/wiki/Jira-Plugin'
+
     def __init__(self, manager):
         self.client       = manager.client
         self.config       = Config(os.path.join(manager.dataPath, 'jira'))
