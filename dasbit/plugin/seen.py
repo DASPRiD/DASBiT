@@ -5,6 +5,8 @@ from time import time
 import datetime
 
 class Seen:
+    help = 'https://github.com/DASPRiD/DASBiT/wiki/Seen-Plugin'
+
     def __init__(self, manager):
         self.client = manager.client
         self.config = Config(os.path.join(manager.dataPath, 'seen'))
