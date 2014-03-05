@@ -12,14 +12,13 @@ enable further plugins, call "!plugin enable <plugin-name>".
 
 Available Plugins
 -----------------
-The following plugins are shipped with DASBiT:
+The following core plugins are shipped with DASBiT:
 
 - users: user access management
 - plugins: plugin management
 - channels: joining and parting channels
 
-
-See the [wiki](https://github.com/DASPRiD/DASBiT/wiki/Plugins) for a full list and help on plugins
+Additional helpful plugins are also provided. See the [wiki](https://github.com/DASPRiD/DASBiT/wiki/Plugins) for a full list and help.
 
 License
 -------
