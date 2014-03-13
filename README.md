@@ -22,5 +22,5 @@ Additional helpful plugins are also provided. See the [wiki](https://github.com/
 
 License
 -------
-The files in thios archive are released under the new BSD license that is
+The files in this archive are released under the new BSD license that is
 bundled with this package in the file LICENSE.
