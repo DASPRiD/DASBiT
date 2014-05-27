@@ -2,7 +2,12 @@ import re
 import os
 import lxml.html
 from urllib import urlencode
+import treq
+from twisted.internet.defer import Deferred
 from twisted.web.client import getPage
+from twisted.web.client import ResponseDone
+from twisted.web.http import PotentialDataLoss
+from twisted.internet.protocol import Protocol
 from dasbit.core import Config
 
 class UriLookup:
@@ -35,12 +40,21 @@ class UriLookup:
             return
 
         for uri in re.findall("https?://[^\s]+", message.message):
-            getPage(uri).addCallbacks(
-                callback = self._successResult,
+            treq.get(uri, unbuffered = True).addCallbacks(
+                callback = self._gotResponse,
                 errback = self._errorResult,
                 callbackArgs = (message, uri),
                 errbackArgs = (message, uri)
             )
+            
+    def _gotResponse(self, response, message, uri):
+        d = Deferred()
+        d.addCallbacks(
+            callback = self._successResult,
+            callbackArgs = (message, uri)
+        )
+
+        response.deliverBody(_BodyCollector(d))
                 
     def _successResult(self, html, message, uri):
         tree         = lxml.html.fromstring(html)
@@ -70,4 +84,22 @@ class UriLookup:
                     
     def _returnResult(self, uri, title, message):
         self.client.reply(message, '[ %s ] %s' % (uri, title))
+
+# We gotta make sure to not download huge files; the first 10kb should usually
+# be enough to find the title.
+class _BodyCollector(Protocol):
+    def __init__(self, finished):
+        self.finished = finished
+        self.size     = 0
+        self.data     = ''
+
+    def dataReceived(self, data):
+        self.data += data
+        self.size += len(data)
+
+        if self.size > 10240:
+            self.loseConnection()
+
+    def connectionLost(self, reason):
+        self.finished.callback(self.data)
 
