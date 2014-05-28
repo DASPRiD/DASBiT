@@ -48,13 +48,23 @@ class UriLookup:
             )
             
     def _gotResponse(self, response, message, uri):
-        d = Deferred()
-        d.addCallbacks(
-            callback = self._successResult,
-            callbackArgs = (message, uri)
-        )
+        if response.headers.hasHeader('content-type'):
+            mimeType = response.headers.getRawHeaders('content-type')[0].split(';')[0].strip().lower()
 
-        response.deliverBody(_BodyCollector(d))
+            if mimeType == 'text/html':
+                d = Deferred()
+                d.addCallbacks(
+                    callback = self._successResult,
+                    callbackArgs = (message, uri)
+                )
+
+                response.deliverBody(_BodyCollector(d))
+                return
+
+            self._prepareResult(uri, mimeType, message)
+            return
+
+        self._prepareResult(uri, 'Unknown', message)
                 
     def _successResult(self, html, message, uri):
         tree         = lxml.html.fromstring(html)
@@ -70,7 +80,7 @@ class UriLookup:
         self._prepareResult(uri, title, message)
 
     def _errorResult(self, error, message, uri):
-        self._prepareResult(uri, 'Not found', message)
+        self._prepareResult(uri, 'Error retrieving URI', message)
         
     def _prepareResult(self, uri, title, message):
         if len(uri) > 25:
