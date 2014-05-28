@@ -95,7 +95,7 @@ class UriLookup:
     def _returnResult(self, uri, title, message):
         self.client.reply(message, '[ %s ] %s' % (uri, title))
 
-# We gotta make sure to not download huge files; the first 10kb should usually
+# We gotta make sure to not download huge files; the first 100kb should usually
 # be enough to find the title.
 class _BodyCollector(Protocol):
     def __init__(self, finished):
@@ -107,7 +107,7 @@ class _BodyCollector(Protocol):
         self.data += data
         self.size += len(data)
 
-        if self.size > 10240:
+        if self.size > 1024 * 100:
             self.loseConnection()
 
     def connectionLost(self, reason):
