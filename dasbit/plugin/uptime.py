@@ -13,5 +13,5 @@ class Uptime:
     def getUptime(self, source):
         process = psutil.Process(os.getpid())
 
-        self.client.reply(source, 'Uptime: %s' % timesince(datetime.datetime.utcfromtimestamp(process.create_time), ''))
+        self.client.reply(source, 'Uptime: %s' % timesince(datetime.datetime.utcfromtimestamp(process.create_time()), ''))
 

@@ -45,7 +45,7 @@ class Github:
 
     def remove(self, source, channel, owner, repository):
         for index, instance in enumerate(self.config['instances']):
-            if instance['channel'] == channel and instance['project'] == project and instance['repository'] == repository:
+            if instance['channel'] == channel and instance['owner'] == owner and instance['repository'] == repository:
                 del self.config['instances'][index]
                 self.config.save()
 
